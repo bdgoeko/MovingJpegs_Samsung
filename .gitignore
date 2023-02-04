@@ -1,3 +1,16 @@
+# Don't want to share any personal photo's or movies
+*.jpg
+*.mpg
+*.mp4
+*.hex
+
+# Ignore emacs backup files
+*~
+
+# This is the name of the executable...
+split_samsung_moving_image
+
+
 # Prerequisites
 *.d
 
