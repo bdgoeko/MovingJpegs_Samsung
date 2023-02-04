@@ -2,11 +2,10 @@
 This is a tool to split a Samsung "moving" image into a jpeg image and a mp4 movie
 
 This is a cheap hack, it will take one option of a filename of the file to split
-apart.  The original file should not be alter... but it will create (or overwrite) 
+apart.  The original file should not be altered, it will create (or OVERWRITE) 
 a output.jpg and output.mp4.
 
 If the files output.jpg and output.mp4 exist it will over write them!!!!
-
 
 I found this repo useful.
 
