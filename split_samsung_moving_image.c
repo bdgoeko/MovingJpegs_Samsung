@@ -2,24 +2,49 @@
 #include <string.h>
 #include <errno.h>
 
+// Copyright (C) 2023, Brian Dolan-Goecke 20230205 
+
 /* Simple program to replace characters that may not be good for the shell
  * Do I want to quote it ? 
  */
+
 const unsigned char MotionPhoto_Data_Marker[] = {
   0x4D, 0x6F, 0x74, 0x69, 0x6F, 0x6E, 0x50, 0x68,
   0x6F, 0x74, 0x6F, 0x5F, 0x44, 0x61, 0x74, 0x61 };
+
+int 
+iffile( char *filename ){
+  // see if a file exists cheap and dirty say try and open it...
+  FILE *tmp_file;
+
+  if ( strlen( filename) <= 0 ) {
+    //fprintf( stderr, "Error bad filename \"%s\"", filename);
+    return 300;
+  }
+  if (( tmp_file = fopen( filename, "r" )) == NULL)  {
+    //fprint( stderr, "");
+    //perror( "Error opening file \"%s\"", filename);
+    return errno;
+  }
+  // if we were able open the file, close it 
+  fclose( tmp_file );
+  return 0;
+} 
 
 int 
 main (int argc, char *argv[])
 {
   int thechar;
   char lastnl=0;
+  char *photofilename="output.jpg";
+  char *moviefilename="output.mp4";
   short match_count=0;
   FILE *thefile;
   FILE *jpg_file;
   FILE *mp4_file;
   FILE *outfile;
   int tmp_cnt=0;
+  int filerr=0;
   
   //char filename[1024];
 
@@ -34,7 +59,7 @@ main (int argc, char *argv[])
     return 3;
   }
 
-  printf( "Errno: %d\n", errno);
+  //printf( "Errno: %d\n", errno);
   printf( "Opening file %s\n", argv[1]);
   thefile = fopen( argv[1], "r");
   if ( thefile == NULL ) {
@@ -44,24 +69,38 @@ main (int argc, char *argv[])
     return 4;
   }
   rewind( thefile);
-  printf( "Errno: %d\n", errno);
+  //printf( "Errno: %d\n", errno);
 
   // if I was a good programmer (person) I would check to make sure these files don't exists first...
-  jpg_file = fopen( "output.jpg", "w" );
-  mp4_file = fopen( "output.mp4", "w" );
+  // see if file exits
+  if( (filerr = iffile( photofilename)) == 0 ) {
+    //fprintf( stderr, "Error '%d\' file \"%s\" exists ?  ", filerr, photofilename);
+    fprintf( stderr, "Error file \"%s\" exists.\n", photofilename);
+    return filerr;
+  }
+
+  // see if file exits
+  if( (filerr = iffile( moviefilename)) == 0 ) {
+    //fprintf( stderr, "Error '%d\' file \"%s\" exists ?  ", filerr, moviefilename);
+    fprintf( stderr, "Error file \"%s\" exists.\n", moviefilename);
+    return filerr;
+  }
+
+  jpg_file = fopen( photofilename, "w" );
+  mp4_file = fopen( moviefilename, "w" );
 
   //outfile = mp4_file;
   outfile = jpg_file;
-  printf( "Outputing to output.jpg\n");
+  printf( "Outputing to \"%s\"\n", photofilename);
 
   thechar= fgetc( thefile);
-  printf( "char: %d\n",thechar);
-  printf( "Errno: %d\n", errno);
+  //printf( "char: %d\n",thechar);
+  //printf( "Errno: %d\n", errno);
   //while( (thechar = fgetc( thefile )) != EOF) {
   while ( thechar != EOF ) {
     //printf( "char: %d\n",thechar);
     if ( thechar == MotionPhoto_Data_Marker[match_count] ) {
-      printf("MotionPhoto_Data_Marker Match %d\n", match_count);
+      //printf("MotionPhoto_Data_Marker Match %d\n", match_count);
       // if complete match we are done
       if ( match_count == 15 ) {
         // we are done complete match
@@ -69,7 +108,7 @@ main (int argc, char *argv[])
         fclose( jpg_file);
         // output the mp4 file
         outfile = mp4_file;
-        printf( "Outputing to output.mp4\n");
+        printf( "Outputing to \"%s\"\n", moviefilename);
         // output rest of file to output.mp4
         while( thechar != EOF) {
           thechar = fgetc( thefile);
@@ -92,7 +131,7 @@ main (int argc, char *argv[])
           // printf( "%c", MotionPhoto_Data_Marker[tmp_cnt] )
           //putchar(thechar);
           fputc( MotionPhoto_Data_Marker[tmp_cnt++] , outfile);
-          printf( "+");
+          //printf( "+");
         }
         //fputc( thechar, outfile);
         //printf( "-");
